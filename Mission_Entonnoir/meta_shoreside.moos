@@ -1,0 +1,114 @@
+//*******************************************************
+// ShoreSide Configuration File
+
+ServerHost = localhost
+ServerPort = 9000
+Community  = shoreside
+
+#include plug_origin_warp.moos
+  
+//--------------------------------------------------------
+Processconfig = ANTLER
+{
+  MSBetweenLaunches = 400
+
+  Run = MOOSDB              @ NewConsole = false
+  Run = pMarineViewer       @ NewConsole = false
+  Run = pLogger             @ NewConsole = false
+
+  Run = pShare              @ NewConsole = false
+  Run = pHostInfo           @ NewConsole = false
+  Run = uFldShoreBroker     @ NewConsole = false
+  Run = uFldNodeComms       @ NewConsole = false
+
+  Run = uFldCTDSensor       @ NewConsole = false
+  Run = pGradeFrontEstimate @ NewConsole=false
+}
+
+#include plug_uFldCTDSensor_1.moos
+#include plug_pHostInfo.moos
+#include plug_pLogger.moos
+//--------------------------------------------------
+// pGradeFrontEstiamte Configuration Block
+
+ProcessConfig = pGradeFrontEstimate
+{
+  AppTick=1
+  CommsTick = 1
+
+}
+
+//---------------------------------------------------------
+// pShare Config Block
+
+ProcessConfig = pShare
+{
+  AppTick    = 2
+  CommsTick  = 2
+
+  input = route = localhost:9300 & multicast_12
+}
+
+
+//--------------------------------------------------
+// uFldShoreBroker Configuration Block
+
+ProcessConfig = uFldShoreBroker
+{
+  AppTick       = 1
+  CommsTick     = 1
+
+  qbridge  = DEPLOY, NODE_REPORT, NODE_MESSAGE
+  qbridge  = MOOS_MANUAL_OVERRIDE
+
+  bridge= src=UCTD_MSMNT_REPORT_$V,alias=UCTD_MSMNT_REPORT
+  bridge   = src=APPCAST_REQ 
+}
+
+//--------------------------------------------------
+// uFldNodeComms Configuration Block
+
+ProcessConfig = uFldNodeComms
+{
+	AppTick   = 2
+	CommsTick = 2
+
+	comms_range      = 100
+	critical_range   = 25
+	min_msg_interval = 15
+	max_msg_length   = 2048
+	groups           = true
+	view_node_rpt_pulses = true
+}
+
+//--------------------------------------------------------
+ProcessConfig = pMarineViewer
+{
+  AppTick    = 4
+  CommsTick  = 4
+
+  TIFF_FILE            = forrest19.tif
+  set_pan_x            = -90
+  set_pan_y            = -280
+  zoom                 = 0.45
+  vehicles_shape_scale = 1.5
+  vehicles_name_mode   = off
+  polygon_viewable_labels = false
+  seglist_viewable_labels = false
+  seglist_viewable_all = false
+  marker_viewable_labels = false
+  point_viewable_labels = false
+
+  appcast_width = 30
+
+  appcast_viewable     = true
+  appcast_color_scheme = indigo
+
+  SCOPE = UCTD_PARAMETER_ESTIMATE
+
+  button_one   = DEPLOY_ALL  # DEPLOY_ALL=true 
+  button_one   = MOOS_MANUAL_OVERRIDE_ALL=false
+  button_one   = RETURN_ALL=false
+  button_one   = FRONT_SURVEY=true 
+  button_two = ALLSTOP  # DEPLOY_ALL=false # MOOS_MANUAL_OVERRIDE_ALL=true
+}

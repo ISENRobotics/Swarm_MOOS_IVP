@@ -1,0 +1,83 @@
+//----------------------------------------------
+// Vehicle behavior file
+//----------------------------------------------
+
+initialize   DEPLOY  = false
+initialize   SURVEY  = true
+initialize   AVOID   = true
+initialize   OBSTACLE_HIT = 0
+initialize   MOOS_MANUAL_OVERRIDE = true
+
+set MODE = SURVEYING {
+  DEPLOY  = true
+  SURVEY = true
+  OBSTACLE_HIT = 0
+}
+
+//----------------------------------------------
+Behavior = BHV_Waypoint
+{ 
+  name         = waypt_survey
+  pwt          = 100
+  condition    = MODE==SURVEYING
+  perpetual    = true
+  endflag      = MOOS_MANUAL_OVERRIDE = true
+
+         speed = 2   // meters per second
+        radius = 5.0
+   slip_radius = 15.0
+
+	points = $(STOP_POS)
+}
+
+//----------------------------------------------
+Behavior=BHV_AvoidObstacle
+{
+  name       = avd_obstacle1
+  pwt        = 500
+  condition  = MODE == SURVEYING
+
+  poly = pts=$(OBSTACLE_POS1)
+
+  allowable_ttc = 60 
+  activation_dist = 20
+  buffer_dist = 15
+ }
+
+//----------------------------------------------
+Behavior=BHV_AvoidObstacle
+{
+  name       = avd_obstacle2
+  pwt        = 500
+  condition  = MODE == SURVEYING
+
+  poly = pts=$(OBSTACLE_POS2)
+
+  allowable_ttc = 60 
+  activation_dist = 20
+  buffer_dist = 15
+ }
+
+//------------------------------------------------
+Behavior = BHV_AvoidCollision
+{
+  name       = avdcollision_
+  pwt        = 200
+  condition  = AVOID = true
+  updates    = CONTACT_INFO
+  endflag    = CONTACT_RESOLVED = $[CONTACT]
+  templating = spawn
+
+               contact = to-be-set
+      on_no_contact_ok = true
+           extrapolate = true
+                 decay = 30,60
+
+        pwt_outer_dist = 50
+        pwt_inner_dist = 20
+        completed_dist = 75
+     min_util_cpa_dist = 5
+     max_util_cpa_dist = 15
+             pwt_grade = linear
+   bearing_line_config = white:0, green:0.65, yellow:0.8, red:1.0
+}
